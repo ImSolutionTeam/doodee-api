@@ -8,10 +8,12 @@ async function bootstrap() {
     .setTitle('Doodee API')
     .setDescription('The Doodee API description')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  await app.listen(3000);
+  await app.listen(process.env.PORT);
+  console.log('Start nestjs on Port:', process.env.PORT);
 }
 bootstrap();

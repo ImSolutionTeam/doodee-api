@@ -1,9 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class QueueDto {
-  @ApiProperty()
+  @ApiProperty({
+    default: 'Doodee makmak',
+    type: String,
+  })
   fullname: string;
-  @ApiProperty()
+  @ApiProperty({
+    default: '0812345678',
+    type: String,
+  })
   telNumber: string;
   @ApiProperty()
   lindId: string;
@@ -11,8 +17,14 @@ export class QueueDto {
   email: string;
   @ApiProperty()
   province: string;
-  @ApiProperty()
+  @ApiProperty({
+    default: 55,
+    type: Number,
+  })
   weight: number;
-  @ApiProperty()
+  @ApiProperty({
+    default: 170,
+    type: Number,
+  })
   height: number;
 }

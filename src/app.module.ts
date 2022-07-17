@@ -1,23 +1,24 @@
-import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
+import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
+import { JwtModule } from '@nestjs/jwt';
+
+import { JwtStrategy } from './jwt.strategy';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { MongooseModule } from '@nestjs/mongoose';
 import { Queue, QueueSchema } from './schemas/queue.schema';
 import { User, UserSchema } from './schemas/user.schema';
-import { JwtModule } from '@nestjs/jwt';
-import { JwtStrategy } from './jwt.strategy';
 
 @Module({
   imports: [
-    MongooseModule.forRoot(
-      'mongodb+srv://dev-doodee:Aa1234@dev-doodee.rnhai.mongodb.net/doodee',
-    ),
+    ConfigModule.forRoot(),
+    MongooseModule.forRoot(process.env.MONGO_URI),
     MongooseModule.forFeature([
       { name: Queue.name, schema: QueueSchema },
       { name: User.name, schema: UserSchema },
     ]),
     JwtModule.register({
-      secret: 'ChamodnoiNarak',
+      secret: process.env.SECRET_JWT,
       signOptions: { expiresIn: '24hr' },
     }),
   ],
