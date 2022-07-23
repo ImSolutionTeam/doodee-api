@@ -1,4 +1,11 @@
-import { Controller, Post, Body, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
 
 import { AppService } from './app.service';
@@ -32,5 +39,10 @@ export class AppController {
   @Post('getQueue')
   getQueue() {
     return this.appService.getQueue();
+  }
+
+  @Get('getCurrencyRate')
+  getCurrencyRate() {
+    return this.appService.getCurrencyRate();
   }
 }

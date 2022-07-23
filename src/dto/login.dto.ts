@@ -7,7 +7,7 @@ export class LoginDto {
   })
   username: string;
   @ApiProperty({
-    default: 'Dd*123456',
+    default: '123456',
     type: String,
   })
   password: string;
