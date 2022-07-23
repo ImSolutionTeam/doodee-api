@@ -35,8 +35,8 @@ export class AppService {
         `https://apigw1.bot.or.th/bot/public/Stat-ExchangeRate/v2/DAILY_AVG_EXG_RATE/`,
         {
           params: {
-            start_period: '2022-07-20', // moment().format('YYYY-MM-DD'),
-            end_period: '2022-07-20', // moment().format('YYYY-MM-DD'),
+            start_period: moment().format('YYYY-MM-DD'),
+            end_period: moment().format('YYYY-MM-DD'),
           },
           headers: {
             'X-IBM-Client-Id': process.env.BOT_CLIENT_ID,
