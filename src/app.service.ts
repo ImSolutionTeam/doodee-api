@@ -5,7 +5,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Cron } from '@nestjs/schedule';
 import axios from 'axios';
-import * as moment from 'moment';
+import moment from 'moment';
 
 import { LoginDto } from './dto/login.dto';
 import { QueueDto } from './dto/queue.dto';
