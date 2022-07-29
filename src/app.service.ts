@@ -3,9 +3,8 @@ import { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Cron } from '@nestjs/schedule';
 import axios from 'axios';
-import moment from 'moment';
+import * as moment from 'moment-timezone';
 
 import { LoginDto } from './dto/login.dto';
 import { QueueDto } from './dto/queue.dto';
@@ -27,42 +26,6 @@ export class AppService {
   ) {}
 
   private saltRounds = 10;
-
-  @Cron('0 0 22 * * *')
-  async handleCron() {
-    try {
-      const data: any = await axios.get(
-        `https://apigw1.bot.or.th/bot/public/Stat-ExchangeRate/v2/DAILY_AVG_EXG_RATE/`,
-        {
-          params: {
-            start_period: moment().format('YYYY-MM-DD'),
-            end_period: moment().format('YYYY-MM-DD'),
-          },
-          headers: {
-            'X-IBM-Client-Id': process.env.BOT_CLIENT_ID,
-          },
-        },
-      );
-      console.log('data =>', data.data.result.data.data_detail);
-      if (
-        data.data.result.data.data_detail.length > 0 &&
-        data.data.result.data.data_detail[0].mid_rate
-      ) {
-        const currencyRate = data.data.result.data.data_detail;
-        const createdCurrencyRate = new this.currencyRateModel();
-        createdCurrencyRate.dateId = currencyRate[0].period;
-        createdCurrencyRate.timestamp = moment(currencyRate[0].period).unix();
-        const rate = {};
-        currencyRate.forEach((element: any) => {
-          return (rate[element.currency_id] = Number(element.mid_rate));
-        });
-        createdCurrencyRate.rate = rate;
-        await createdCurrencyRate.save();
-      }
-    } catch (e) {
-      console.log(e);
-    }
-  }
 
   async login(loginDto: LoginDto): Promise<object> {
     try {
@@ -125,12 +88,61 @@ export class AppService {
   }
 
   async getCurrencyRate(): Promise<object> {
-    const data = await this.currencyRateModel
-      .findOne({})
-      .sort({ timestamp: -1 })
-      .lean();
-
-    return this.response(0, data);
+    try {
+      const dateId = moment()
+        .tz('Asia/Bangkok')
+        .subtract('1', 'days')
+        .format('YYYY-MM-DD');
+      let currencyRate = await this.currencyRateModel
+        .findOne({
+          dateId,
+        })
+        .lean();
+      if (!currencyRate) {
+        const data: any = await axios.get(
+          `https://apigw1.bot.or.th/bot/public/Stat-ExchangeRate/v2/DAILY_AVG_EXG_RATE/`,
+          {
+            params: {
+              start_period: dateId,
+              end_period: dateId,
+            },
+            headers: {
+              'X-IBM-Client-Id': process.env.BOT_CLIENT_ID,
+            },
+          },
+        );
+        console.log('data.data =>', data.data.result.data.data_detail[0]);
+        if (
+          data.data.result.data.data_detail &&
+          data.data.result.data.data_detail.length > 0 &&
+          data.data.result.data.data_detail[0].mid_rate
+        ) {
+          const currencyRate = data.data.result.data.data_detail;
+          const createdCurrencyRate = new this.currencyRateModel();
+          createdCurrencyRate.dateId = currencyRate[0].period;
+          createdCurrencyRate.timestamp = moment(currencyRate[0].period).unix();
+          const rate = {};
+          currencyRate.forEach((element: any) => {
+            return (rate[element.currency_id] = Number(element.mid_rate));
+          });
+          createdCurrencyRate.rate = rate;
+          await createdCurrencyRate.save();
+          return this.response(0, createdCurrencyRate);
+        } else {
+          currencyRate = await this.currencyRateModel
+            .findOne({})
+            .sort({ timestamp: -1 })
+            .lean();
+        }
+      }
+      return this.response(0, currencyRate);
+    } catch (e) {
+      const currencyRate = await this.currencyRateModel
+        .findOne({})
+        .sort({ timestamp: -1 })
+        .lean();
+      return this.response(0, currencyRate);
+    }
   }
 
   response(code: number, data: any): object {
