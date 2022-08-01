@@ -83,8 +83,8 @@ export class AppService {
     try {
       const queueList = await this.queueModel.find({
         timestamp: {
-          $gte: moment(getQueueDto.startDate).unix(),
-          $lt: moment(getQueueDto.endDate).unix(),
+          $gte: moment.tz(getQueueDto.startDate, 'Asia/Bangkok').unix(),
+          $lt: moment.tz(getQueueDto.endDate, 'Asia/Bangkok').unix(),
         },
       });
       return this.response(0, { queueList });
