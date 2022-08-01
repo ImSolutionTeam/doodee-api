@@ -4,7 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import axios from 'axios';
-import * as moment from 'moment-timezone';
+import moment from 'moment-timezone';
 
 import { LoginDto } from './dto/login.dto';
 import { QueueDto } from './dto/queue.dto';
@@ -15,6 +15,7 @@ import {
   CurrencyRate,
   CurrencyRateDocument,
 } from './schemas/currencyrate.schema';
+import { GetQueueDto } from './dto/getqueue.dto';
 
 @Injectable()
 export class AppService {
@@ -68,7 +69,7 @@ export class AppService {
         queueDto.weight
       ) {
         const createdQueue = new this.queueModel(queueDto);
-        createdQueue.timestamp = Date.now();
+        createdQueue.timestamp = moment().unix();
         await createdQueue.save();
         return this.response(0, {});
       }
@@ -78,11 +79,17 @@ export class AppService {
     }
   }
 
-  async getQueue(): Promise<object> {
+  async getQueue(getQueueDto: GetQueueDto): Promise<object> {
     try {
-      const queueList = await this.queueModel.find({});
+      const queueList = await this.queueModel.find({
+        timestamp: {
+          $gte: moment(getQueueDto.startDate).unix(),
+          $lt: moment(getQueueDto.endDate).unix(),
+        },
+      });
       return this.response(0, { queueList });
     } catch (e) {
+      console.log('e =>', e);
       return this.response(999, {});
     }
   }

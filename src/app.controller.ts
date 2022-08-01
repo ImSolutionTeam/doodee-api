@@ -11,6 +11,7 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 import { AppService } from './app.service';
 import { LoginDto } from './dto/login.dto';
 import { QueueDto } from './dto/queue.dto';
+import { GetQueueDto } from './dto/getqueue.dto';
 import { RegisterDto } from './dto/register.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 
@@ -37,8 +38,8 @@ export class AppController {
 
   @UseGuards(JwtAuthGuard)
   @Post('getQueue')
-  getQueue() {
-    return this.appService.getQueue();
+  getQueue(@Body() getQueueDto: GetQueueDto) {
+    return this.appService.getQueue(getQueueDto);
   }
 
   @Get('getCurrencyRate')
